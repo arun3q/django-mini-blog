@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Idea
@@ -10,8 +11,18 @@ class IdeaListView(ListView):
 	context_object_name = 'posts'
 
 	ordering = ['-date_posted']
+	paginate_by = 8
 
+class UserIdeaListView(ListView):
+	model = Idea
+	template_name = 'idea/user_ideas.html'
+	context_object_name = 'posts'
 
+	paginate_by = 8
+
+	def get_queryset(self):
+		user = get_object_or_404(User, username=self.kwargs.get('username'))
+		return Idea.objects.filter(author=user).order_by('-date_posted')
 
 class IdeaDetailView(DetailView):
 	model = Idea
